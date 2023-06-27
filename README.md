@@ -4,9 +4,13 @@ Hello, this is the version of the game for the Global Game Jam 2023 competition,
 
 Team:
 Podobriy Vladyslav - Programming
+
 Oleksandr Volynets - Programming
+
 Danylo Poliushko - Programming (me)
+
 Mykhailo Hnatiuk - 2D Art
+
 Nadiia Podobriy - Music
 
 Link on GGJ2023 Website with our game:
