@@ -1,5 +1,9 @@
 using System.Collections;
 using Assets.Scripts.Events;
+using Configs.General;
+using Configs.Root;
+using DIContainer;
+using EntityFactory;
 using Nora.NEvent;
 using Pixelplacement;
 using UnityEngine;
@@ -8,15 +12,12 @@ public class RootController : MonoBehaviour
 {
     private int _houseDamage;
 
-    [SerializeField]
-    private AnimationCurve _damageChangeColorCurve;
-    
-    [SerializeField]
-    private float _health;
-
+    [SerializeField] private AnimationCurve _damageChangeColorCurve;
     [SerializeField] private SpriteRenderer _topRenderer;
     [SerializeField] private SpriteRenderer _bottomRenderer;
     [SerializeField] private GameObject _beaverPrefab;
+    
+    private float _health;
     private GameObject _beaver;
     private Rigidbody2D _rb;
     private BoxCollider2D _col;
@@ -27,6 +28,21 @@ public class RootController : MonoBehaviour
     private bool _canGrow;
     private bool _isDead;
     
+    private RootConfig _config;
+    private GeneralConfig _configGeneral;
+    private IEntityFactory _entityFactory;
+    
+    [Inject]
+    private void Construct(RootConfig config, GeneralConfig generalConfig, IEntityFactory entityFactory)
+    {
+        _config = config;
+        _configGeneral = generalConfig;
+        _entityFactory = entityFactory;
+        
+        _health = _config.RootInitialHealth;
+        _houseDamage = _config.HouseDamage;
+    }
+    
     void Start()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -35,9 +51,6 @@ public class RootController : MonoBehaviour
         _clickable = GetComponent<ClickableObject>();
 
         _clickable.ClickEvent.AddListener(OnClick);
-        
-        _health = GlobalSettings.Instance.RootInitialHealth;
-        _houseDamage = GlobalSettings.Instance.HouseDamage;
     }
 
     private void OnClick()
@@ -51,7 +64,7 @@ public class RootController : MonoBehaviour
         {
             CharacterController.Instance.AttackRoot("Hands", positionX, transform.position.x, () =>
             {
-                GetDamage(GlobalSettings.Instance.DamageByHands);
+                GetDamage(_config.DamageByHands);
                 
                 if (_level > 0 || _isDead)
                     CharacterController.Instance.StopCurrentRoutine();
@@ -60,7 +73,7 @@ public class RootController : MonoBehaviour
         else if (_level == 1){
             CharacterController.Instance.AttackRoot("Shovel", positionX, transform.position.x,() =>
             {
-                GetDamage(GlobalSettings.Instance.DamageByShovel);
+                GetDamage(_config.DamageByShovel);
                 
                 if (_level > 1 || _isDead)
                     CharacterController.Instance.StopCurrentRoutine();
@@ -70,7 +83,7 @@ public class RootController : MonoBehaviour
         {
             CharacterController.Instance.AttackRoot("Axe",positionX, transform.position.x,() =>
             {
-                GetDamage(GlobalSettings.Instance.DamageByAxe);
+                GetDamage(_config.DamageByAxe);
                 
                 if (_isDead)
                     CharacterController.Instance.StopCurrentRoutine();
@@ -84,8 +97,8 @@ public class RootController : MonoBehaviour
         
         if (_health <= 0)
         {
-            CoinsAndScoreController.Instance.ChangeCoinsValue(GlobalSettings.Instance.CoinsForRoot);
-            CoinsAndScoreController.Instance.ChangeScoreValue(GlobalSettings.Instance.ScoreForRoot);
+            // --------------- CoinsAndScoreController.Instance.ChangeCoinsValue(GlobalSettings.Instance.CoinsForRoot);
+            // --------------- CoinsAndScoreController.Instance.ChangeScoreValue(GlobalSettings.Instance.ScoreForRoot);
             
             _isDead = true;
             
@@ -118,7 +131,7 @@ public class RootController : MonoBehaviour
     //Корутина роста
     private IEnumerator Grow()
     {
-        var growTimeRange = GlobalSettings.Instance.GrowRangeSeconds;
+        var growTimeRange = _config.GrowRangeSeconds;
         
         //Пока уровень дерева меньше 4
         while (true){
@@ -138,7 +151,7 @@ public class RootController : MonoBehaviour
         _anim.SetBool("canGrow", false);
 
         //Лечимся
-        _health += GlobalSettings.Instance.LevelUpRootHealing;
+        _health += _config.LevelUpRootHealing;
 
         if (_level == 4)
         {
@@ -150,12 +163,13 @@ public class RootController : MonoBehaviour
 
     private IEnumerator BeaverSpawn()
     {
-        var spawnRange = GlobalSettings.Instance.BeaversSpawnRangeSeconds;
+        var spawnRange = _config.BeaversSpawnRangeSeconds;
         
         while (true)
         {
             yield return new WaitForSeconds(Random.Range(spawnRange.x, spawnRange.y));
-            BeaverSpawnController.Instance.TrySpawnBeaverFromPool(new Vector2(transform.position.x, -3.55f));
+            // --------------- BeaverSpawnController.Instance.TrySpawnBeaverFromPool(new Vector2(transform.position.x, -3.55f));
+            _entityFactory.CreateEntity(EntityType.Beaver, new Vector2(transform.position.x, -3.55f));
         }
     }
 }

@@ -1,52 +1,42 @@
 using System;
 using UnityEngine;
 using System.Collections;
-using System.Linq.Expressions;
+using Configs.Charactert;
+using DIContainer;
 using Pixelplacement;
 
 public class CharacterController : Singleton<CharacterController>
 {
-    [SerializeField] 
-    private float _speed = 12;
-
-    [SerializeField] 
-    private float _jumpForce;
-    
-    [SerializeField] 
-    private Transform renderRoot;
-    
-    [SerializeField] 
-    private InventoryItemDto _currentActiveItem;
-    
-    [SerializeField]
-    private Rigidbody2D _throwAxePrefab;
+    [SerializeField] private float _speed = 12;
+    [SerializeField] private float _jumpForce;
+    [SerializeField] private Transform renderRoot;
+    [SerializeField] private InventoryItemDto _currentActiveItem;
+    [SerializeField] private Rigidbody2D _throwAxePrefab;
+    [SerializeField] private SpriteRenderer _renderer;
+    [SerializeField] private AnimationCurve _damageChangeColorCurve;
 
     private InventoryItemType _currentRoutineItemType;
-    
+
     private bool _isGrounded;
-    
+
     private Animator _anim;
     private Rigidbody2D _rb;
-    
-    [SerializeField]
-    private SpriteRenderer _renderer;
     
     private Action _onActionExecuted;
     private Coroutine _currentRoutine;
 
     private bool _autoMove;
     private bool _canAct = true;
-    
-    [SerializeField]
-    private AnimationCurve _damageChangeColorCurve;
 
+    [Inject] private CharacterConfig _config;
+    
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _anim = GetComponent<Animator>();
 
-        _speed = GlobalSettings.Instance.CharacterSpeed;
-        _jumpForce = GlobalSettings.Instance.JumpForce;
+        _speed = _config.CharacterSpeed;
+        _jumpForce = _config.JumpForce;
     }
     
     void FixedUpdate()
@@ -322,7 +312,7 @@ public class CharacterController : Singleton<CharacterController>
         Tween.Value(Color.white, new Color(0.4f, 0.7f, 1, 1), (Color value) =>
         {
             _renderer.color = value;
-        }, GlobalSettings.Instance.FreezeDurationSeconds, 0, _damageChangeColorCurve, completeCallback: () =>
+        }, 1 /*GlobalSettings.Instance.FreezeDurationSeconds*/, 0, _damageChangeColorCurve, completeCallback: () =>
         {
             _anim.speed = 1;
             _canAct = true;

@@ -1,39 +1,42 @@
-using System.Collections;
+using System.Threading;
+using System.Threading.Tasks;
+using Configs.General;
+using DIContainer;
 using UnityEngine;
 using TMPro;
-using Nora.NEvent;
-using Assets.Scripts.Events;
 
 public class Timer : MonoBehaviour
 {
-    private int _sec = 0;
-    private int _min = 0;
-    
-    [SerializeField]
-    private TextMeshProUGUI _text;
+    [SerializeField] private TextMeshProUGUI _text;
 
+    private int _seconds = 0;
+    private int _minutes = 0;
+
+    private CancellationTokenSource _ctk;
+
+    //TODO: Change script
+    [Inject] private GeneralConfig _config;
+    
     private void Start()
     {
-        StartCoroutine(ITimer());
+        _ = StartTimer();
     }
 
-    private IEnumerator ITimer()
+    private async Task StartTimer()
     {
-        while (true)
+        while (!_ctk.IsCancellationRequested)
         {
-            _sec += 1;
-            
-            if (_sec == 60)
+            _seconds++;
+        
+            if (_seconds == 60)
             {
-                _min++;
-                _sec = 0;
+                _minutes++;
+                _seconds = 0;
             }
-            
-            CoinsAndScoreController.Instance.ChangeScoreValue(GlobalSettings.Instance.ScoreForSecond);
-
-            _text.text = _min.ToString("D2") + ":" + _sec.ToString("D2");
-            
-            yield return new WaitForSeconds(1);
+        
+            CoinsAndScoreController.Instance.ChangeScoreValue(_config.ScoreForSecond);
+            _text.text = _minutes.ToString("D2") + ":" + _seconds.ToString("D2");
+            await Task.Delay(1000);
         }
     }
 

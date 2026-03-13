@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1654eb6523651ec49b5826fddd2b806e, type: 3}
+  m_Name: RootConfig
+  m_EditorClassIdentifier: 
+  <Health>k__BackingField: 100
+  <BeaversSpawnRangeSeconds>k__BackingField: {x: 20, y: 25}
+  <GrowRangeSeconds>k__BackingField: {x: 5, y: 10}
+  <RootInitialHealth>k__BackingField: 50
+  <LevelUpRootHealing>k__BackingField: 50
+  <HouseDamage>k__BackingField: 5
+  <DamageByHands>k__BackingField: 20
+  <DamageByShovel>k__BackingField: 20
+  <DamageByAxe>k__BackingField: 30

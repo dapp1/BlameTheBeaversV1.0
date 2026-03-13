@@ -1,3 +1,5 @@
+using Configs.Beaver;
+using DIContainer;
 using UnityEngine;
 
 
@@ -12,7 +14,9 @@ public class BeaverController : MonoBehaviour
     private bool _isAttack;
     private bool _isDead;
 
-    void Awake()
+    [Inject] private BeaverConfig _config;
+
+    void Start()
     {
         _anim = GetComponent<Animator>();
         _clickable = GetComponent<ClickableObject>();
@@ -23,7 +27,7 @@ public class BeaverController : MonoBehaviour
             player.KickBeaver(this, Die);
         });
         
-        _speed = GlobalSettings.Instance.BeaverSpeed;
+        _speed = _config.Speed;
     }
 
     private void OnEnable()
@@ -76,8 +80,8 @@ public class BeaverController : MonoBehaviour
 
     private void Die()
     {
-        CoinsAndScoreController.Instance.ChangeCoinsValue(GlobalSettings.Instance.CoinsForBeaver);
-        CoinsAndScoreController.Instance.ChangeScoreValue(GlobalSettings.Instance.ScoreForBeaver);
+        // ----------- CoinsAndScoreController.Instance.ChangeCoinsValue(GlobalSettings.Instance.CoinsForBeaver);
+        // ----------- CoinsAndScoreController.Instance.ChangeScoreValue(GlobalSettings.Instance.ScoreForBeaver);
         _anim.Play("BeaverDie");
         _isDead = true;
     }

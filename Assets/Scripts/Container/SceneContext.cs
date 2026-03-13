@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using EntityFactory;
+using UnityEngine;
 
 namespace DIContainer
 {
@@ -6,17 +7,24 @@ namespace DIContainer
     public class SceneContext : Context
     {
         [SerializeField] private MonoBehaviour[] _objects;
+        
         private GameContext _gameContext;
         
-        protected void Awake()
+        protected override void Awake()
         {
-            _gameContext = FindObjectOfType<GameContext>();
-            
+            _gameContext = GameContext.Instance;
             Container = new Container(_gameContext.Container);
-
+            InstallBindings();
+        }
+        
+        protected override void InstallBindings()
+        {
+            Container.BindInstance(Container);
+            Container.Bind<IEntityFactory, EntityFactory.EntityFactory>();
+            
             foreach (var monoBehaviour in _objects)
             {
-                Inject(monoBehaviour);
+                Container.Inject(monoBehaviour);
             }
         }
     }

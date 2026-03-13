@@ -1,4 +1,6 @@
 using Assets.Scripts.Events;
+using Configs.General;
+using DIContainer;
 using Nora.NEvent;
 using Pixelplacement;
 using Pixelplacement.TweenSystem;
@@ -12,17 +14,18 @@ public class CoinsAndScoreController : Singleton<CoinsAndScoreController>
     [SerializeField] private Animator _anim;
 
     private int _animationScoreValue = 0;
-    public int Score => _animationScoreValue;
 
     private int _coinsCount;
     private int _scoreCount;
     
     private TweenBase _coinsUpdateTween;
     private TweenBase _scoreUpdateTween;
+
+    [Inject] private GeneralConfig _config;
     
     private void Awake()
     {
-        _coinsCount = GlobalSettings.Instance.InitialCoins;
+        // _coinsCount = _config.InitialCoins;
         _textCoins.SetText(_coinsCount.ToString());
     }
 
@@ -61,7 +64,7 @@ public class CoinsAndScoreController : Singleton<CoinsAndScoreController>
             _animationScoreValue = val;
         }, 1, 0);
 
-        if (_animationScoreValue >= GlobalSettings.Instance.NeededScore)
-            NEventManager.StartEvent(new EndGameEvent(EndGameReason.ScoreAchived));
+        //if (_animationScoreValue >= _config.NeededScore)
+            //NEventManager.StartEvent(new EndGameEvent(EndGameReason.ScoreAchived));
     }
 }

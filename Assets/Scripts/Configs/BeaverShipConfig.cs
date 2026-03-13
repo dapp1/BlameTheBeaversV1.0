@@ -7,6 +7,8 @@ namespace Configs.BeaverShip
     {
         [field: SerializeField] public int Health { get; private set; }
         [field: SerializeField] public Vector2 SpeedRange { get; private set; }
+        [field: SerializeField] public Vector2 RootsSpawnRangeSecondsStart { get; private set; }
+        [field: SerializeField] public Vector2 RootsSpawnRangeSecondsEnd { get; private set; }
      
         [field: SerializeField] public int RootChance { get; private set; }
         [field: SerializeField] public GameObject RootPrefab { get; private set; }

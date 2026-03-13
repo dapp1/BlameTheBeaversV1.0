@@ -151,9 +151,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c630c13a1af44008622be036d6cd869, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _monobehaivors: []
+  _objects: []
   _scriptableObjects:
+  - {fileID: 11400000, guid: 2d9adb26cd5d43d49b58b3bc0c97dae0, type: 2}
   - {fileID: 11400000, guid: 81bb5af9111ff0145aceabdbbdfb6198, type: 2}
+  - {fileID: 11400000, guid: 59f08314e4acab642a4b1e412a66d8c6, type: 2}
+  - {fileID: 11400000, guid: 68f0de1ddf276a048b56510328c4945b, type: 2}
+  - {fileID: 11400000, guid: 63a69341e4eebb84da36e1a379205106, type: 2}
+  - {fileID: 11400000, guid: 46694a1298cef7d448c421e4cb3c7294, type: 2}
+  - {fileID: 11400000, guid: 66afcfd1770195f4ba4700dd538cf854, type: 2}
 --- !u!4 &74200436
 Transform:
   m_ObjectHideFlags: 0

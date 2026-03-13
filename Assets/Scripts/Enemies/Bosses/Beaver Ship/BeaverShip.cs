@@ -1,32 +1,42 @@
 using System.Collections;
 using Assets.Scripts.Events;
+using Configs;
 using Configs.BeaverShip;
 using DIContainer;
+using EntityFactory;
 using Nora.NEvent;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class BeaverShip : MonoBehaviour
 {
-    //TODO: Inject with future container
-    [Inject] private BeaverShipConfig _config;
-    
     [SerializeField] private Animator _animator;
-
     [SerializeField] private AnimationCurve _damageChangeColorCurve;
     [SerializeField] private Transform[] _points;
 
     private int _health;
     private int _pointIndex;
     private float _defaultSpeed;
-    
+
     private SpriteRenderer _renderer;
+    private IEntityFactory _entityFactory;
+    private BeaverShipConfig _config;
+    private TempoConfig _configTempo;
     
+    [Inject]
+    private void Construct(BeaverShipConfig config, TempoConfig configTempo, IEntityFactory entityFactory)
+    {
+        _config = config;
+        _configTempo = configTempo;
+        _entityFactory = entityFactory;
+        
+        _health = _config.Health;
+        _defaultSpeed = Random.Range(_config.SpeedRange.x, _config.SpeedRange.y);
+    }
+
     private void Awake()
     {
-        _health = _config.Health;
         _renderer = GetComponent<SpriteRenderer>();
-        _defaultSpeed = Random.Range(_config.SpeedRange.x, _config.SpeedRange.y);
     }
 
     void Start() => StartCoroutine(RootSpawn());
@@ -52,8 +62,8 @@ public class BeaverShip : MonoBehaviour
     
     private IEnumerator RootSpawn()
     {
-        var startRange = GlobalSettings.Instance.RootsSpawnRangeSecondsStart;
-        var endRange = GlobalSettings.Instance.RootsSpawnRangeSecondsEnd;
+        var startRange = _config.RootsSpawnRangeSecondsStart;
+        var endRange = _config.RootsSpawnRangeSecondsEnd;
     
         while (true)
         {
@@ -62,18 +72,16 @@ public class BeaverShip : MonoBehaviour
             var currentRangeY = TempoController.Instance.EvaluateFloatByDifficulty(startRange.y, endRange.y);
     
             yield return new WaitForSeconds(Random.Range(currentRangeX, currentRangeY));
-
-            GameObject go;
             
             if (Random.Range(0f, 100f) < _config.BeaverChance)
             {
-                go = Instantiate(_config.BeaverPrefab);
-                go.transform.position = new Vector2(transform.position.x, transform.position.y - 0.7f);
+                _entityFactory.CreateEntity(EntityType.Beaver,
+                    new Vector2(transform.position.x, transform.position.y - 0.7f), 5);
             }
             else
             {
-                go = Instantiate(_config.RootPrefab);
-                go.transform.position = new Vector2(transform.position.x, transform.position.y - 0.7f);
+                _entityFactory.CreateEntity(EntityType.Root,
+                    new Vector2(transform.position.x, transform.position.y - 0.7f));
             }
         }
     }

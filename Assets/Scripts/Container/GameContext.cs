@@ -1,34 +1,34 @@
-﻿using EnemyFactory;
+﻿using EntityFactory;
 using UnityEngine;
 
 namespace DIContainer
 {
-    [DefaultExecutionOrder(-1000)]
+    [DefaultExecutionOrder(-2000)]
     public class GameContext : Context
     {
+        public static GameContext Instance { get; private set; }
+        
         [SerializeField] private MonoBehaviour[] _objects;
         
         [Header("Scriptables")]
         [SerializeField] protected ScriptableObject[] _scriptableObjects;
         
-        protected void Awake()
+        protected override void Awake()
         {
+            Instance = this;
+            base.Awake();
             DontDestroyOnLoad(this);
-            
-            Container = new Container();
-            Bind();
+        }
+
+        protected override void InstallBindings()
+        {
+            Container.Bind(_scriptableObjects);
+            Container.BindInstance(Container);
             
             foreach (var monoBehaviour in _objects)
             {
-                Inject(monoBehaviour);
+                Container.Inject(monoBehaviour);
             }
-        }
-
-        private void Bind()
-        {
-            Container.Bind(_scriptableObjects);
-            
-            Container.Bind<EnemyFactory.EnemyFactory,IEnemyFactory>();
         }
     }
 }
