@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Unity.Mathematics;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -17,7 +18,12 @@ namespace DIContainer
             _parent = parent;
         }
 
-        public GameObject Instantiate(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent)
+        public GameObject Instantiate(GameObject prefab, Transform parent)
+        {
+            return Instantiate(prefab, Vector3.zero, quaternion.identity, parent);
+        }
+        
+        public GameObject Instantiate(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent = null)
         {
             var obj = Object.Instantiate(prefab, position, rotation, parent);
             var monos = obj.GetComponents<MonoBehaviour>();
@@ -27,18 +33,7 @@ namespace DIContainer
             
             return obj;
         }
-        
-        public GameObject Instantiate(GameObject prefab, Vector3 position, Quaternion rotation)
-        {
-            var obj = Object.Instantiate(prefab, position, rotation);
-            var monos = obj.GetComponents<MonoBehaviour>();
-            
-            foreach (var monoBehaviour in monos)
-                Inject(monoBehaviour);
 
-            return obj;
-        }
-        
         public void Bind(object[] objs)
         {
             foreach (var obj in objs)

@@ -1,6 +1,7 @@
 ﻿using System;
 using AnimationHelper;
 using Entites;
+using Mirror.Examples.TopDownShooter;
 using UnityEngine;
 
 namespace NewStateMachine.BeaverStates
@@ -14,15 +15,17 @@ namespace NewStateMachine.BeaverStates
         private Transform _targetTransform;
         private Animator _animator;
         private int _damage;
+        private float _attackRange;
         private IDamagable _damagable;
         private AnimationEventReceiver _animReceiver;
 
-        public AttackState(Transform owner, Animator animator, AnimationEventReceiver animReceiver, int damage)
+        public AttackState(Transform owner, Animator animator, AnimationEventReceiver animReceiver, int damage , float attackRange)
         {
             _owner = owner;
             _animator = animator;
-            _damage = damage;
             _animReceiver = animReceiver;
+            _attackRange = attackRange;
+            _damage = damage;
         }
 
         public void OnEnter(StateDataBase data)
@@ -40,7 +43,7 @@ namespace NewStateMachine.BeaverStates
 
         public void FixedUpdate()
         {
-            if ((Mathf.Abs(_owner.position.x - _targetTransform.position.x) > 0.5f))
+            if ((Mathf.Abs(_owner.position.x - _targetTransform.position.x) > _attackRange))
             {
                 RequestToTransition?.Invoke(new WalkStateData());
             }
@@ -54,7 +57,7 @@ namespace NewStateMachine.BeaverStates
 
         private void OnHit()
         {
-            if ((Mathf.Abs(_owner.position.x - _targetTransform.position.x) <= 0.5f))
+            if ((Mathf.Abs(_owner.position.x - _targetTransform.position.x) <= _attackRange))
             {
                 _damagable.TakeDamage(_damage);
             }

@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using NewStateMachine.BeaverStates;
+﻿using System.Collections.Generic;
 
 namespace NewStateMachine
 {
     public enum StateType
     {
-        Idle, Walk, Attack
+        Idle, Walk, Attack, Death
     }
+    
     public class StateMachine
     {
         private IReadOnlyDictionary<StateType, IState<StateDataBase>> _unitStates;
@@ -26,7 +25,7 @@ namespace NewStateMachine
             ChangeState(new StateDataBase(type: StateType.Walk));
         }
 
-        private void StopStateMachine()
+        public void StopStateMachine()
         {
             _currentState?.OnExit();
             _currentState = null;

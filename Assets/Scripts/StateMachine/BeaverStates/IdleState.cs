@@ -8,8 +8,7 @@ namespace NewStateMachine.BeaverStates
         
         public void OnEnter(StateDataBase data)
         {
-            var player = UnityEngine.Object.FindObjectOfType<CharacterController>();
-            RequestToTransition?.Invoke(new StateDataBase(StateType.Idle));
+            
         }
 
         public void FixedUpdate()

@@ -144,6 +144,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _animationEventReceiver: {fileID: 7829822724932517864}
+  _animator: {fileID: 1435556944}
 --- !u!114 &1785672946
 MonoBehaviour:
   m_ObjectHideFlags: 0

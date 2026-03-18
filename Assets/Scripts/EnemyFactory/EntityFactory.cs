@@ -68,7 +68,7 @@ namespace EntityFactory
 
             for (int i = 0; i < initialCount; i++)
             {
-                var obj = Object.Instantiate(_prefab, _parent);
+                var obj = _container.Instantiate(_prefab, _parent);
                 obj.SetActive(false);
                 _objects.Add(obj);
             }

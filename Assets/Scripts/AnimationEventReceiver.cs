@@ -5,7 +5,7 @@ namespace AnimationHelper
 {
     public enum AnimationEventType
     {
-        Hit
+        Hit, Death
     }
     
     public class AnimationEventReceiver : MonoBehaviour

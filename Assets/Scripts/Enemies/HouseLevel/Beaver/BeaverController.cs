@@ -12,10 +12,10 @@ using UnityEngine;
 public class BeaverController : BaseEntity, IDamagable
 {
     [SerializeField] private AnimationEventReceiver _animationEventReceiver;
-    
+    [SerializeField] private Animator _animator;
+
     private float _speed = 2f;
     private bool _isGrounded;
-    private Animator _anim;
     private ClickableObject _clickable;
 
     private BeaverConfig _config;
@@ -26,48 +26,55 @@ public class BeaverController : BaseEntity, IDamagable
     {
         _config = config;
         _speed = _config.Speed;
+        
+        var states = new Dictionary<StateType, IState<StateDataBase>>
+        {
+            { StateType.Idle, new IdleState() },
+            { StateType.Walk, new WalkState(_animator, transform, _speed) },
+            { StateType.Attack, new AttackState(transform, _animator, _animationEventReceiver, _config.Damage, _config.AttackRange) },
+            { StateType.Death, new DeathState(_animator, _animationEventReceiver, gameObject) }
+        };
+        
+        _stateMachine = new StateMachine(states);
     }
     
     void Start()
     {
-        _anim = GetComponent<Animator>();
         _clickable = GetComponent<ClickableObject>();
-        
-        // _clickable.ClickEvent.AddListener(() =>
-        // {
-        //     _player.KickBeaver(this, Die);
-        // });
 
-        var states = new Dictionary<StateType, IState<StateDataBase>>
+        _clickable.ClickEvent.AddListener(() =>
         {
-            { StateType.Idle, new IdleState() },
-            { StateType.Walk, new WalkState(_anim, transform, _speed) },
-            { StateType.Attack, new AttackState(transform, _anim, _animationEventReceiver, 0) }
-        };
-
-        _stateMachine = new StateMachine(states);
-    }
-    
-    void Update()
-    {
-        _stateMachine.FixedUpdate();
+            //_player.KickBeaver(this, Die);
+            _stateMachine.ChangeState(new StateDataBase(StateType.Death));
+        });
     }
 
-    private void Die()
+    private void OnEnable()
     {
-        // ----------- CoinsAndScoreController.Instance.ChangeCoinsValue(GlobalSettings.Instance.CoinsForBeaver);
-        // ----------- CoinsAndScoreController.Instance.ChangeScoreValue(GlobalSettings.Instance.ScoreForBeaver);
-        _anim.Play("BeaverDie");
+        SetDefault();
     }
 
-    //Called from animation event
-    public void Destroy()
+    void Update() => _stateMachine?.FixedUpdate();
+
+    // private void Die()
+    // {
+    //     // ----------- CoinsAndScoreController.Instance.ChangeCoinsValue(GlobalSettings.Instance.CoinsForBeaver);
+    //     // ----------- CoinsAndScoreController.Instance.ChangeScoreValue(GlobalSettings.Instance.ScoreForBeaver);
+    //     _animator.Play("BeaverDie");
+    // }
+
+    public void SetDefault()
     {
-        gameObject.SetActive(false);
+        _stateMachine?.ChangeState(new WalkStateData());
     }
 
     public void TakeDamage(int damage)
     {
-        throw new System.NotImplementedException();
+        
+    }
+
+    private void OnDisable()
+    {
+        _stateMachine?.StopStateMachine();
     }
 }
