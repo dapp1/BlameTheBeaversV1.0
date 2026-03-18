@@ -3,12 +3,13 @@ using Assets.Scripts.Events;
 using Configs.General;
 using Configs.Root;
 using DIContainer;
+using Entites;
 using EntityFactory;
 using Nora.NEvent;
 using Pixelplacement;
 using UnityEngine;
 
-public class RootController : MonoBehaviour 
+public class RootController : BaseEntity 
 {
     private int _houseDamage;
 
@@ -30,14 +31,12 @@ public class RootController : MonoBehaviour
     
     private RootConfig _config;
     private GeneralConfig _configGeneral;
-    private IEntityFactory _entityFactory;
     
     [Inject]
-    private void Construct(RootConfig config, GeneralConfig generalConfig, IEntityFactory entityFactory)
+    private void Construct(RootConfig config, GeneralConfig generalConfig)
     {
         _config = config;
         _configGeneral = generalConfig;
-        _entityFactory = entityFactory;
         
         _health = _config.RootInitialHealth;
         _houseDamage = _config.HouseDamage;
@@ -55,40 +54,40 @@ public class RootController : MonoBehaviour
 
     private void OnClick()
     {
-        var playerPosition = CharacterController.Instance.transform.position;
-        var positionX = transform.position.x < playerPosition.x
-            ? transform.position.x + 0.6f
-            : transform.position.x - 0.6f;
-        
-        if (_level == 0)
-        {
-            CharacterController.Instance.AttackRoot("Hands", positionX, transform.position.x, () =>
-            {
-                GetDamage(_config.DamageByHands);
-                
-                if (_level > 0 || _isDead)
-                    CharacterController.Instance.StopCurrentRoutine();
-            });
-        }
-        else if (_level == 1){
-            CharacterController.Instance.AttackRoot("Shovel", positionX, transform.position.x,() =>
-            {
-                GetDamage(_config.DamageByShovel);
-                
-                if (_level > 1 || _isDead)
-                    CharacterController.Instance.StopCurrentRoutine();
-            });
-        }
-        else if (_level < 5)
-        {
-            CharacterController.Instance.AttackRoot("Axe",positionX, transform.position.x,() =>
-            {
-                GetDamage(_config.DamageByAxe);
-                
-                if (_isDead)
-                    CharacterController.Instance.StopCurrentRoutine();
-            });
-        }
+        // var playerPosition = CharacterController.Instance.transform.position;
+        // var positionX = transform.position.x < playerPosition.x
+        //     ? transform.position.x + 0.6f
+        //     : transform.position.x - 0.6f;
+        //
+        // if (_level == 0)
+        // {
+        //     CharacterController.Instance.AttackRoot("Hands", positionX, transform.position.x, () =>
+        //     {
+        //         GetDamage(_config.DamageByHands);
+        //         
+        //         if (_level > 0 || _isDead)
+        //             CharacterController.Instance.StopCurrentRoutine();
+        //     });
+        // }
+        // else if (_level == 1){
+        //     CharacterController.Instance.AttackRoot("Shovel", positionX, transform.position.x,() =>
+        //     {
+        //         GetDamage(_config.DamageByShovel);
+        //         
+        //         if (_level > 1 || _isDead)
+        //             CharacterController.Instance.StopCurrentRoutine();
+        //     });
+        // }
+        // else if (_level < 5)
+        // {
+        //     CharacterController.Instance.AttackRoot("Axe",positionX, transform.position.x,() =>
+        //     {
+        //         GetDamage(_config.DamageByAxe);
+        //         
+        //         if (_isDead)
+        //             CharacterController.Instance.StopCurrentRoutine();
+        //     });
+        // }
     }
 
     private void GetDamage(float damage)
@@ -119,9 +118,7 @@ public class RootController : MonoBehaviour
         if (col.gameObject.CompareTag("ground"))
         {
             _col.isTrigger = true;
-            //Удалить rigidbody (чтоб больше не падал)
             Destroy(_rb);
-            //Начать корутину роста
             StartCoroutine(Grow());
             
             _anim.Play("startGrowing");
@@ -157,19 +154,18 @@ public class RootController : MonoBehaviour
         {
             NEventManager.StartEvent(new HouseDamageEvent(_houseDamage));
             StopAllCoroutines();
-            StartCoroutine(BeaverSpawn());
         }
     }
 
-    private IEnumerator BeaverSpawn()
-    {
-        var spawnRange = _config.BeaversSpawnRangeSeconds;
-        
-        while (true)
-        {
-            yield return new WaitForSeconds(Random.Range(spawnRange.x, spawnRange.y));
-            // --------------- BeaverSpawnController.Instance.TrySpawnBeaverFromPool(new Vector2(transform.position.x, -3.55f));
-            _entityFactory.CreateEntity(EntityType.Beaver, new Vector2(transform.position.x, -3.55f));
-        }
-    }
+    // private IEnumerator BeaverSpawn()
+    // {
+    //     var spawnRange = _config.BeaversSpawnRangeSeconds;
+    //     
+    //     while (true)
+    //     {
+    //         yield return new WaitForSeconds(Random.Range(spawnRange.x, spawnRange.y));
+    //         // --------------- BeaverSpawnController.Instance.TrySpawnBeaverFromPool(new Vector2(transform.position.x, -3.55f));
+    //         _entityFactory.CreateEntity(EntityType.Beaver, new Vector2(transform.position.x, -3.55f), 5);
+    //     }
+    // }
 }

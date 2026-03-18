@@ -3,12 +3,14 @@ using UnityEngine;
 using System.Collections;
 using Configs.Charactert;
 using DIContainer;
+using Entites;
 using Pixelplacement;
 
-public class CharacterController : Singleton<CharacterController>
+public class CharacterController : MonoBehaviour, IDamagable
 {
-    [SerializeField] private float _speed = 12;
-    [SerializeField] private float _jumpForce;
+    private float _speed = 12;
+    private float _jumpForce;
+    
     [SerializeField] private Transform renderRoot;
     [SerializeField] private InventoryItemDto _currentActiveItem;
     [SerializeField] private Rigidbody2D _throwAxePrefab;
@@ -304,7 +306,7 @@ public class CharacterController : Singleton<CharacterController>
         }
     }
 
-    public void Damage()
+    public void TakeDamage(int damage)
     {
         _anim.speed = 0;
         _canAct = false;

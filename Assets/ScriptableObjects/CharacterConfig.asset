@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a19433d40392ba46a38c8c7c82afa05, type: 3}
   m_Name: CharacterConfig
   m_EditorClassIdentifier: 
-  <CharacterSpeed>k__BackingField: 4
+  <CharacterSpeed>k__BackingField: 0.1
   <JumpForce>k__BackingField: 3
   <FreezeDurationSeconds>k__BackingField: 1

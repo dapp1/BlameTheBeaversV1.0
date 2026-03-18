@@ -86,7 +86,7 @@ namespace EntityFactory
                 }
             }
             
-            if (_maxCount == -1 || _objects.Count < _maxCount)
+            if (_maxCount < 0 || _objects.Count < _maxCount)
             {
                 var obj = _container.Instantiate(_prefab, position, Quaternion.identity, _parent);
                 _objects.Add(obj);

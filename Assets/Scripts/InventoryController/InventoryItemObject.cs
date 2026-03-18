@@ -40,7 +40,7 @@ public class InventoryItemObject : MonoBehaviour
 
     private void OnClick()
     {
-        CharacterController.Instance.PickItem(this, OnPick);
+        //CharacterController.Instance.PickItem(this, OnPick);
     }
 
     private void OnPick()

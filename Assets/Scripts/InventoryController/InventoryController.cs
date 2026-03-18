@@ -77,7 +77,7 @@ public class InventoryController : Singleton<InventoryController>
 
     private void SetActiveItem(InventoryItemDto dto)
     {
-        CharacterController.Instance.SetActiveItem(dto);
+        //CharacterController.Instance.SetActiveItem(dto);
         _activeItemType = dto.Type;
     }
     
@@ -102,10 +102,9 @@ public class InventoryController : Singleton<InventoryController>
     {
         var itemSettings = ItemsCatalog.First(x => x.Type == dto.Type);
         
-        InventoryItemObject itemObject = Instantiate(itemSettings.Prefab, 
-            CharacterController.Instance.transform.position, Quaternion.identity);
+       // InventoryItemObject itemObject = Instantiate(itemSettings.Prefab, CharacterController.Instance.transform.position, Quaternion.identity);
 
-        itemObject.InventoryItemDto = dto;
+        //itemObject.InventoryItemDto = dto;
         
         _inventory[dto.Type] = null;
         

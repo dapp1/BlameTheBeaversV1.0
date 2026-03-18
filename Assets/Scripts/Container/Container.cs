@@ -20,24 +20,21 @@ namespace DIContainer
         public GameObject Instantiate(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent)
         {
             var obj = Object.Instantiate(prefab, position, rotation, parent);
-            obj.SetActive(false);
             var monos = obj.GetComponents<MonoBehaviour>();
             
             foreach (var monoBehaviour in monos)
-            {
                 Inject(monoBehaviour);
-            }
-
-            obj.SetActive(true);
-
+            
             return obj;
         }
         
         public GameObject Instantiate(GameObject prefab, Vector3 position, Quaternion rotation)
         {
             var obj = Object.Instantiate(prefab, position, rotation);
-
-            Inject(obj.GetComponent<MonoBehaviour>());
+            var monos = obj.GetComponents<MonoBehaviour>();
+            
+            foreach (var monoBehaviour in monos)
+                Inject(monoBehaviour);
 
             return obj;
         }

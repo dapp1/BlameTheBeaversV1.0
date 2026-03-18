@@ -81,7 +81,7 @@ public class BeaverShip : MonoBehaviour
             else
             {
                 _entityFactory.CreateEntity(EntityType.Root,
-                    new Vector2(transform.position.x, transform.position.y - 0.7f));
+                    new Vector2(transform.position.x, transform.position.y - 0.7f), -1);
             }
         }
     }
