@@ -7,11 +7,6 @@ namespace NewStateMachine.BeaverStates
 {
     public class WalkState : IState<StateDataBase>
     {
-        public void OnEnter(WalkStateData data)
-        {
-            throw new NotImplementedException();
-        }
-
         public event Action<StateDataBase> RequestToTransition;
 
         private Animator _animator;

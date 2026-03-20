@@ -1,13 +1,18 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using Assets.Scripts.Events;
 using Configs.General;
 using Configs.Root;
 using DIContainer;
 using Entites;
-using EntityFactory;
+using NewStateMachine;
 using Nora.NEvent;
+using EventBusSystem;
 using Pixelplacement;
+using StateMachine;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class RootController : BaseEntity 
 {
@@ -31,17 +36,33 @@ public class RootController : BaseEntity
     
     private RootConfig _config;
     private GeneralConfig _configGeneral;
+
+    private NewStateMachine.StateMachine _stateMachine;
     
+    public int CurrentLevel => _level;
+
     [Inject]
     private void Construct(RootConfig config, GeneralConfig generalConfig)
     {
         _config = config;
         _configGeneral = generalConfig;
-        
+
         _health = _config.RootInitialHealth;
         _houseDamage = _config.HouseDamage;
+        // _stateMachine = new NewStateMachine.StateMachine(
+        //     new Dictionary<StateType, IState<StateDataBase>>(
+        // {
+        //     // { StateType.Idle, new RootIdleState() },
+        //     // { StateType.GetDamage, new RootAttackedState() },
+        //     // { StateType.Death, new RootDeathState() }
+        // }));
     }
-    
+
+    private void OnClick()
+    {
+        EventBus.Publish(new OnClickRootEvent(this));
+    }
+
     void Start()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -52,8 +73,8 @@ public class RootController : BaseEntity
         _clickable.ClickEvent.AddListener(OnClick);
     }
 
-    private void OnClick()
-    {
+    // private void OnClick()
+    // {
         // var playerPosition = CharacterController.Instance.transform.position;
         // var positionX = transform.position.x < playerPosition.x
         //     ? transform.position.x + 0.6f
@@ -88,7 +109,7 @@ public class RootController : BaseEntity
         //             CharacterController.Instance.StopCurrentRoutine();
         //     });
         // }
-    }
+    //}
 
     private void GetDamage(float damage)
     {

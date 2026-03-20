@@ -25,12 +25,16 @@ namespace DIContainer
         
         public GameObject Instantiate(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent = null)
         {
+            bool isActive = prefab.gameObject.activeSelf;
+            prefab.gameObject.SetActive(false);
+            
             var obj = Object.Instantiate(prefab, position, rotation, parent);
             var monos = obj.GetComponents<MonoBehaviour>();
             
             foreach (var monoBehaviour in monos)
                 Inject(monoBehaviour);
             
+            prefab.gameObject.SetActive(isActive);
             return obj;
         }
 

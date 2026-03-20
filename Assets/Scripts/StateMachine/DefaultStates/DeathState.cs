@@ -22,7 +22,8 @@ namespace NewStateMachine.BeaverStates
         public void OnEnter(StateDataBase data)
         {
             _animator.Play("Death");
-
+            _animator.SetBool("isAlive", false);
+            
             _receiver.OnEvent += OnDie;
         }
 
@@ -40,7 +41,6 @@ namespace NewStateMachine.BeaverStates
         {
             _owner.SetActive(false);
             _receiver.OnEvent -= OnDie;
-            RequestToTransition?.Invoke(new StateDataBase(StateType.Idle));
         }
     }
 }

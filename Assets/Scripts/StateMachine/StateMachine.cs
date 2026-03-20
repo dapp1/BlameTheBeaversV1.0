@@ -4,7 +4,7 @@ namespace NewStateMachine
 {
     public enum StateType
     {
-        Idle, Walk, Attack, Death
+        Idle, Walk, Attack, GetDamage, Fly, Death
     }
     
     public class StateMachine
@@ -12,6 +12,7 @@ namespace NewStateMachine
         private IReadOnlyDictionary<StateType, IState<StateDataBase>> _unitStates;
 
         private IState<StateDataBase> _currentState;
+        public IState<StateDataBase> CurrentState => _currentState;
 
         public StateMachine(Dictionary<StateType, IState<StateDataBase>> states)
         {

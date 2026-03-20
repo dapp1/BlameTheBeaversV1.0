@@ -4,6 +4,7 @@ using System.Collections;
 using Configs.Charactert;
 using DIContainer;
 using Entites;
+using EventBusSystem;
 using Pixelplacement;
 
 public class CharacterController : MonoBehaviour, IDamagable
@@ -39,6 +40,9 @@ public class CharacterController : MonoBehaviour, IDamagable
 
         _speed = _config.CharacterSpeed;
         _jumpForce = _config.JumpForce;
+        
+        EventBus.Subscribe<OnClickRootEvent>(AttackRoot);
+        EventBus.Subscribe<OnClickBeaverEvent>(KickBeaver);
     }
     
     void FixedUpdate()
@@ -174,14 +178,14 @@ public class CharacterController : MonoBehaviour, IDamagable
         onPick?.Invoke();
     }
     
-    public void KickBeaver(BeaverController beaver, Action onKick)
+    public void KickBeaver(OnClickBeaverEvent clickBeaver)
     {
         if (!_canAct || !_isGrounded)
             return;
         
         StopCurrentRoutine();
         
-        _currentRoutine = StartCoroutine(KickBeaverRoutine(beaver, onKick));
+        _currentRoutine = StartCoroutine(KickBeaverRoutine(clickBeaver.Beaver, clickBeaver.OnKick));
     }
 
     private IEnumerator KickBeaverRoutine(BeaverController beaver, Action onKick)
@@ -261,6 +265,50 @@ public class CharacterController : MonoBehaviour, IDamagable
         _onActionExecuted = onActionExecuted;
     }
 
+    private void AttackRoot(OnClickRootEvent clickEvent)
+    {
+        var playerPosition = transform.position;
+        var positionX = clickEvent.Root.transform.position.x < playerPosition.x
+            ? clickEvent.Root.transform.position.x + 0.6f
+            : clickEvent.Root.transform.position.x - 0.6f;
+
+        switch (clickEvent.Root.CurrentLevel)
+        {
+            case 0: AttackRoot("Hands", positionX, clickEvent.Root.transform.position.x, null); break;
+            case 1: AttackRoot("Shovel", positionX, clickEvent.Root.transform.position.x, null); break;
+            case < 5: AttackRoot("Axe", positionX, clickEvent.Root.transform.position.x, null); break;
+        }
+            
+        // if (root.CurrentLevel == 0)
+        // {
+        // CharacterController.Instance.AttackRoot("Hands", positionX, transform.position.x, () =>
+        // {
+        //     GetDamage(_config.DamageByHands);
+        //     
+        //     if (_level > 0 || _isDead)
+        //         CharacterController.Instance.StopCurrentRoutine();
+        // });
+        // }
+        // else if (root.CurrentLevel == 1){
+        // CharacterController.Instance.AttackRoot("Shovel", positionX, transform.position.x,() =>
+        // {
+        //     GetDamage(_config.DamageByShovel);
+        //     
+        //     if (_level > 1 || _isDead)
+        //         CharacterController.Instance.StopCurrentRoutine();
+        // });
+        // }
+        // else if (root.CurrentLevel < 5)
+        // {
+        // CharacterController.Instance.AttackRoot("Axe",positionX, transform.position.x,() =>
+        // {
+        //     GetDamage(_config.DamageByAxe);
+        //     
+        //     if (_isDead)
+        //         CharacterController.Instance.StopCurrentRoutine();
+        // });
+        // }
+    }
     
     //Called from animation event
     private void OnActionAnimationEvent()
