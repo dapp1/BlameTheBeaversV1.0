@@ -1,4 +1,5 @@
 using System;
+using EventBusSystem;
 using UnityEngine;
 
 [Serializable]
@@ -40,7 +41,7 @@ public class InventoryItemObject : MonoBehaviour
 
     private void OnClick()
     {
-        //CharacterController.Instance.PickItem(this, OnPick);
+        EventBus.Publish(new OnClickItemEvent(this, OnPick));
     }
 
     private void OnPick()

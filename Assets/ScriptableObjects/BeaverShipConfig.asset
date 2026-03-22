@@ -16,7 +16,7 @@ MonoBehaviour:
   <SpeedRange>k__BackingField: {x: 3, y: 5}
   <RootsSpawnRangeSecondsStart>k__BackingField: {x: 1, y: 3}
   <RootsSpawnRangeSecondsEnd>k__BackingField: {x: 1, y: 3}
-  <RootChance>k__BackingField: 75
+  <RootChance>k__BackingField: 85
   <RootPrefab>k__BackingField: {fileID: 680232997687960970, guid: 6d8b7061639e64b4786aa0206786f53d, type: 3}
-  <BeaverChance>k__BackingField: 25
+  <BeaverChance>k__BackingField: 15
   <BeaverPrefab>k__BackingField: {fileID: 1283672771451051145, guid: 589745acbdf34cd45a1c5703c0ac77d4, type: 3}

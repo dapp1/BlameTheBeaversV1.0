@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using EventBusSystem;
 using Pixelplacement;
 using UnityEngine;
 
@@ -8,13 +9,7 @@ public class InventoryController : Singleton<InventoryController>
 {
     [SerializeField] private LootBox _lootBoxPrefab;
     
-    private Dictionary<InventoryItemType, InventoryItemDto> _inventory =
-        new Dictionary<InventoryItemType, InventoryItemDto>
-        {
-            {InventoryItemType.Hands, new InventoryItemDto{Type = InventoryItemType.Hands, Durability = Mathf.Infinity}},
-            {InventoryItemType.Axe, null},
-            {InventoryItemType.Shovel, null}
-        };
+    private readonly Dictionary<InventoryItemType, InventoryItemDto> _inventory = new();
 
     public List<InventoryItem> ItemsCatalog;
 
@@ -24,31 +19,51 @@ public class InventoryController : Singleton<InventoryController>
 
     private bool canSwitchItems = true;
     
+    private readonly List<InventoryItemType> _switchableItems = new()
+    {
+        InventoryItemType.Axe,
+        InventoryItemType.Shovel
+    };
+    
+    private Dictionary<InventoryItemType, InventoryItem> _itemsByType;
+    
+    private void Awake()
+    {
+        _inventory.Add(InventoryItemType.Hands, new InventoryItemDto{Type = InventoryItemType.Hands, Durability = Mathf.Infinity});
+        _itemsByType = ItemsCatalog.ToDictionary(x => x.Type);
+    }
+    
     private void Update()
     {
-        var wheelDelta = Input.GetAxis("Mouse ScrollWheel");
-        if (wheelDelta != 0 && canSwitchItems)
-            StartCoroutine(SwitchItems(wheelDelta > 0 ? 1 : -1));
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+
+        if (scroll != 0 && canSwitchItems)
+        {
+            StartCoroutine(SwitchItems(scroll > 0 ? 1 : -1));
+        }
     }
+
+    private int _currentIndex = 0;
 
     private IEnumerator SwitchItems(int direction)
     {
         canSwitchItems = false;
-        
-        var nextItemIndex = (int)_activeItemType + direction;
-        
-        if (nextItemIndex > 2)
-            nextItemIndex = 1;
-        
-        if (nextItemIndex < 1)
-            nextItemIndex = 2;
 
-        var dto = _inventory[(InventoryItemType) nextItemIndex];
-        if (dto != null)
+        _currentIndex += direction;
+
+        if (_currentIndex >= _switchableItems.Count)
+            _currentIndex = 0;
+
+        if (_currentIndex < 0)
+            _currentIndex = _switchableItems.Count - 1;
+
+        var type = _switchableItems[_currentIndex];
+
+        if (_inventory.TryGetValue(type, out var dto))
             SetActiveItem(dto);
-        
+
         UpdateUI();
-        
+
         yield return new WaitForSeconds(0.2f);
 
         canSwitchItems = true;
@@ -61,53 +76,40 @@ public class InventoryController : Singleton<InventoryController>
     
     public void Add(InventoryItemDto dto)
     {
-        var itemSettings = ItemsCatalog.First(x => x.Type == dto.Type);
-
-        if (_inventory[dto.Type] != null)
-        {
+        if (_inventory.ContainsKey(dto.Type))
             ThrowItem(_inventory[dto.Type]);
-        }
 
         _inventory[dto.Type] = dto;
-
         SetActiveItem(dto);
-        
         UpdateUI();
     }
 
     private void SetActiveItem(InventoryItemDto dto)
     {
-        //CharacterController.Instance.SetActiveItem(dto);
+        EventBus.Publish(new OnActiveItemChangedEvent(dto));
         _activeItemType = dto.Type;
     }
     
-
     public void Remove(InventoryItemDto dto)
     {
-        var inventoryItemDto = _inventory[dto.Type];
+        if (!_inventory.ContainsKey(dto.Type))
+            return;
 
-        if (inventoryItemDto != null)
-        {
-            if (inventoryItemDto.Type == _activeItemType)
-            {
-                 SetActiveItem(_inventory[InventoryItemType.Hands]);
-                 _inventory[dto.Type] = null;
-            }
-        }
-        
+        if (_activeItemType == dto.Type)
+            SetActiveItem(_inventory[InventoryItemType.Hands]);
+
+        _inventory.Remove(dto.Type);
         UpdateUI();
     }
     
     private void ThrowItem(InventoryItemDto dto)
     {
-        var itemSettings = ItemsCatalog.First(x => x.Type == dto.Type);
+        var itemSettings = _itemsByType[dto.Type];
         
-       // InventoryItemObject itemObject = Instantiate(itemSettings.Prefab, CharacterController.Instance.transform.position, Quaternion.identity);
-
-        //itemObject.InventoryItemDto = dto;
+        InventoryItemObject itemObject = Instantiate(itemSettings.Prefab, Vector3.one, Quaternion.identity);
+        itemObject.InventoryItemDto = dto;
         
-        _inventory[dto.Type] = null;
-        
+        _inventory.Remove(dto.Type);
         UpdateUI();
     }
 
@@ -126,7 +128,7 @@ public class InventoryController : Singleton<InventoryController>
 
     public InventoryItem GetItemSettings(InventoryItemType type)
     {
-        return ItemsCatalog.First(x => x.Type == type);;
+        return _itemsByType[type];
     }
     
     public void UpdateUI()
@@ -136,7 +138,7 @@ public class InventoryController : Singleton<InventoryController>
             if (key == InventoryItemType.Hands)
                 continue;
             
-            var itemSettings = ItemsCatalog.First(x => x.Type == key);
+            var itemSettings = _itemsByType[key];
             
             var item = _inventory[key];
             var cell = Cells[(int)key];

@@ -13,5 +13,8 @@ MonoBehaviour:
   m_Name: CharacterConfig
   m_EditorClassIdentifier: 
   <CharacterSpeed>k__BackingField: 0.1
-  <JumpForce>k__BackingField: 3
+  <JumpForce>k__BackingField: 250
   <FreezeDurationSeconds>k__BackingField: 1
+  <DamageRootByHands>k__BackingField: 20
+  <DamageRootByShovel>k__BackingField: 25
+  <DamageRootByAxe>k__BackingField: 30

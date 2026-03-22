@@ -1,20 +1,16 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using Assets.Scripts.Events;
-using Configs.General;
 using Configs.Root;
 using DIContainer;
 using Entites;
-using NewStateMachine;
 using Nora.NEvent;
 using EventBusSystem;
 using Pixelplacement;
-using StateMachine;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class RootController : BaseEntity 
+public class RootController : BaseEntity, IDamagable
 {
     private int _houseDamage;
 
@@ -32,30 +28,23 @@ public class RootController : BaseEntity
 
     private int _level;
     private bool _canGrow;
-    private bool _isDead;
     
     private RootConfig _config;
-    private GeneralConfig _configGeneral;
 
     private NewStateMachine.StateMachine _stateMachine;
+
+    public event Action OnLevelChangedEvent;
+    public event Action OnDieEvent;
     
     public int CurrentLevel => _level;
 
     [Inject]
-    private void Construct(RootConfig config, GeneralConfig generalConfig)
+    private void Construct(RootConfig config)
     {
         _config = config;
-        _configGeneral = generalConfig;
 
         _health = _config.RootInitialHealth;
         _houseDamage = _config.HouseDamage;
-        // _stateMachine = new NewStateMachine.StateMachine(
-        //     new Dictionary<StateType, IState<StateDataBase>>(
-        // {
-        //     // { StateType.Idle, new RootIdleState() },
-        //     // { StateType.GetDamage, new RootAttackedState() },
-        //     // { StateType.Death, new RootDeathState() }
-        // }));
     }
 
     private void OnClick()
@@ -72,74 +61,13 @@ public class RootController : BaseEntity
 
         _clickable.ClickEvent.AddListener(OnClick);
     }
-
-    // private void OnClick()
-    // {
-        // var playerPosition = CharacterController.Instance.transform.position;
-        // var positionX = transform.position.x < playerPosition.x
-        //     ? transform.position.x + 0.6f
-        //     : transform.position.x - 0.6f;
-        //
-        // if (_level == 0)
-        // {
-        //     CharacterController.Instance.AttackRoot("Hands", positionX, transform.position.x, () =>
-        //     {
-        //         GetDamage(_config.DamageByHands);
-        //         
-        //         if (_level > 0 || _isDead)
-        //             CharacterController.Instance.StopCurrentRoutine();
-        //     });
-        // }
-        // else if (_level == 1){
-        //     CharacterController.Instance.AttackRoot("Shovel", positionX, transform.position.x,() =>
-        //     {
-        //         GetDamage(_config.DamageByShovel);
-        //         
-        //         if (_level > 1 || _isDead)
-        //             CharacterController.Instance.StopCurrentRoutine();
-        //     });
-        // }
-        // else if (_level < 5)
-        // {
-        //     CharacterController.Instance.AttackRoot("Axe",positionX, transform.position.x,() =>
-        //     {
-        //         GetDamage(_config.DamageByAxe);
-        //         
-        //         if (_isDead)
-        //             CharacterController.Instance.StopCurrentRoutine();
-        //     });
-        // }
-    //}
-
-    private void GetDamage(float damage)
-    {
-        _health -= damage;
-        
-        if (_health <= 0)
-        {
-            // --------------- CoinsAndScoreController.Instance.ChangeCoinsValue(GlobalSettings.Instance.CoinsForRoot);
-            // --------------- CoinsAndScoreController.Instance.ChangeScoreValue(GlobalSettings.Instance.ScoreForRoot);
-            
-            _isDead = true;
-            
-            Destroy(gameObject);
-        }
-        else if (_level > 0)
-        {
-            Tween.Value(Color.white, Color.red, (Color value) =>
-            {
-                _topRenderer.color = value;
-                _bottomRenderer.color = value;
-            }, 0.2f, 0, _damageChangeColorCurve);
-        }
-    }
     
     private void OnCollisionEnter2D(Collision2D col)
     {
         if (col.gameObject.CompareTag("ground"))
         {
             _col.isTrigger = true;
-            Destroy(_rb);
+            _rb.bodyType = RigidbodyType2D.Static;
             StartCoroutine(Grow());
             
             _anim.Play("startGrowing");
@@ -159,18 +87,17 @@ public class RootController : BaseEntity
             _anim.SetBool("canGrow", true);
         }
     }
-
     
     //Called from animation event
     public void OnLevelChanged()
     {
-        //Повышаем уровень. Запрещаем расти.
         _level++;
         _anim.SetBool("canGrow", false);
 
-        //Лечимся
         _health += _config.LevelUpRootHealing;
 
+        OnLevelChangedEvent?.Invoke();
+        
         if (_level == 4)
         {
             NEventManager.StartEvent(new HouseDamageEvent(_houseDamage));
@@ -178,15 +105,32 @@ public class RootController : BaseEntity
         }
     }
 
-    // private IEnumerator BeaverSpawn()
-    // {
-    //     var spawnRange = _config.BeaversSpawnRangeSeconds;
-    //     
-    //     while (true)
-    //     {
-    //         yield return new WaitForSeconds(Random.Range(spawnRange.x, spawnRange.y));
-    //         // --------------- BeaverSpawnController.Instance.TrySpawnBeaverFromPool(new Vector2(transform.position.x, -3.55f));
-    //         _entityFactory.CreateEntity(EntityType.Beaver, new Vector2(transform.position.x, -3.55f), 5);
-    //     }
-    // }
+    public void TakeDamage(int damage)
+    {
+        _health -= damage;
+        
+        if (_health <= 0)
+        {
+            // --------------- CoinsAndScoreController.Instance.ChangeCoinsValue(GlobalSettings.Instance.CoinsForRoot);
+            // --------------- CoinsAndScoreController.Instance.ChangeScoreValue(GlobalSettings.Instance.ScoreForRoot);
+            Die();
+        }
+        else if (_level > 0)
+        {
+            Tween.Value(Color.white, Color.red, (Color value) =>
+            {
+                _topRenderer.color = value;
+                _bottomRenderer.color = value;
+            }, 0.2f, 0, _damageChangeColorCurve);
+        }
+    }
+
+    private void Die()
+    {
+        OnDieEvent?.Invoke();
+        gameObject.SetActive(false);
+        _rb.bodyType = RigidbodyType2D.Dynamic;
+        _col.isTrigger = false;
+        OnDieEvent = null;
+    }
 }

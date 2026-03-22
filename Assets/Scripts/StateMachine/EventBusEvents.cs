@@ -29,4 +29,26 @@ namespace EventBusSystem
             OnKick = onKick;
         }
     }
+
+    public class OnClickItemEvent
+    {
+        public InventoryItemObject Item;
+        public Action OnPick;
+        
+        public OnClickItemEvent(InventoryItemObject item, Action onPick)
+        {
+            Item = item;
+            OnPick = onPick;
+        }
+    }
+    
+    public class OnActiveItemChangedEvent
+    {
+        public InventoryItemDto Item;
+
+        public OnActiveItemChangedEvent(InventoryItemDto item)
+        {
+            Item = item;
+        }
+    }
 }
